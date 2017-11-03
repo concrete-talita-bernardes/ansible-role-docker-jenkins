@@ -1,4 +1,4 @@
-image: ami-00fcc917
+image: ami-153d3b7f
 type: t2.micro
 key: cs-talita
 sg_id: sg-675f7015

@@ -1,8 +1,8 @@
 - hosts: localhost
   vars_files:
     - var.yml
+  
   tasks: 
-
     - name: AWS | Launch instance
       ec2:
         key_name: "{{ key }}"
@@ -21,10 +21,10 @@
     - name: AWS | Add instance for host
       add_host:
         hostname: "{{ item.public_ip }}"
-        groupname: launched
+        groupname: docker
         ec2_id: "{{ item.id }}"
       with_items: "{{ machine.instances }}"
-
+    
     - name: AWS | Service ssh up
       wait_for:
         host: "{{ item.public_ip }}"
@@ -33,8 +33,23 @@
         state: started
       with_items: "{{ machine.instances }}"
 
-- name: AWS | Configure instance
-  hosts: launched
+    - name: Install python2 for Ansible
+      host: "{{ item.public_ip }}"
+      raw: bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qqy python-minimal)"
+      register: output
+      changed_when: output.stdout != ""
+      with_items: "{{ machine.instances }}"
+
+    - name: AWS | Attach volume
+      ec2_vol:
+        instance: "{{ item.id }}"
+        volume_size: 8
+        region: "{{ region }}"
+      with_items: "{{ machine.instances }}"
+      register: ec2_vol
+
+- name: AWS | Provision  instance
+  hosts: docker
   become: True
   gather_facts: True
   roles:
