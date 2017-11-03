@@ -32,12 +32,14 @@
     state: present
   become: true
   id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+  ignore_errors: yes
 
 - name: Ubuntu | Add Repo
   apt_repository:
     repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
     state: present
   become: true
+  ignore_errors: yes
 
 - name: Ubuntu | Install Docker
   apt:
@@ -45,4 +47,24 @@
     state: present
     update_cache: yes
   become: true
+
+- name: Ubuntu | Install docker-python modules 
+  pip:
+    name: docker-py
+    version: 1.7.0
+
+- name: Docker | Start Jenkins Container
+  docker:
+    name: jenkins
+    image: jenkins
+    state: started
+    ports:
+    - "80:8080"
+    - "50000:50000"
+    volumes:
+    - /home/ubuntu:/var/jenkins_home
+
+
+
+
 
