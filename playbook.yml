@@ -1,0 +1,42 @@
+- hosts: localhost
+  vars_files:
+    - var.yml
+  tasks: 
+
+    - name: AWS | Launch instance
+      ec2:
+        key_name: "{{ key }}"
+        image: "{{ image }}"
+        wait: yes
+        type: "{{ type }}"
+        count: 1
+        group_id: "{{ sg_id }}"
+        vpc_subnet_id: "{{ subnet }}"
+        assign_public_ip: yes
+        region: "{{ region }}"
+        instance_tags:
+          Name: "EC2-Ansible-Talita"
+      register: machine
+
+    - name: AWS | Add instance for host
+      add_host:
+        hostname: "{{ item.public_ip }}"
+        groupname: launched
+        ec2_id: "{{ item.id }}"
+      with_items: "{{ machine.instances }}"
+
+    - name: AWS | Service ssh up
+      wait_for:
+        host: "{{ item.public_ip }}"
+        port: 22
+        timeout: 600
+        state: started
+      with_items: "{{ machine.instances }}"
+
+- name: AWS | Configure instance
+  hosts: launched
+  become: True
+  gather_facts: True
+  roles:
+    - ansible-role-install-docker
+    
