@@ -7,13 +7,9 @@ galaxy_info:
   license: license (GPLv2, CC-BY, etc)
 
   min_ansible_version: 2.2
-
- 
-
   
   platforms:
-  - name: Ubuntu
-  
+  - name: Ubuntu 
 
   galaxy_tags:
     - ubuntu
@@ -21,7 +17,6 @@ galaxy_info:
     - docker
     - jenkins
     
-
 dependencies: []
 
 
