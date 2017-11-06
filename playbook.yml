@@ -6,13 +6,13 @@
     - name: AWS | Create SG
       ec2_group:
         name: ansible
-        description: a sg for ansible with jenkins
+        description: ansible sg
         state: present
         vpc_id: vpc-52556f34
         rules:
           - proto: tcp
             ports:
-              - 80
+              - 8080
               - 22
               - 50000
             cidr_ip: 0.0.0.0/0
