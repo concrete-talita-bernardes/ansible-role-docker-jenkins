@@ -1,6 +1,6 @@
 ---
 # tasks file for ansible-role-ec2-create
-- name: Ubuntu | Update 
+- name: Ubuntu | Update packages
   apt:
     update_cache: yes
 
@@ -32,14 +32,12 @@
     state: present
   become: true
   id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
-  ignore_errors: yes
 
 - name: Ubuntu | Add Repo
   apt_repository:
     repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
     state: present
   become: true
-  ignore_errors: yes
 
 - name: Ubuntu | Install Docker
   apt:
@@ -51,18 +49,25 @@
 - name: Ubuntu | Install docker-python modules 
   pip:
     name: docker-py
-    version: 1.7.0
+    version: 1.10.6
+
+- name: Docker | Share volumes
+  file:
+    path: /opt/jenkins
+    state: directory
+    mode: 0777
 
 - name: Docker | Start Jenkins Container
-  docker:
+  docker_container:
     name: jenkins
-    image: jenkins
+    image: jenkins/jenkins
+    pull: true
     state: started
     ports:
-    - "80:8080"
+    - "8080:8080"
     - "50000:50000"
     volumes:
-    - /home/ubuntu:/var/jenkins_home
+    - /opt/jenkins:/var/jenkins_home
 
 
 

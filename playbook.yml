@@ -3,6 +3,21 @@
     - var.yml
   
   tasks: 
+    - name: AWS | Create SG
+      ec2_group:
+        name: ansible
+        description: ansible sg
+        state: present
+        vpc_id: vpc-52556f34
+        rules:
+          - proto: tcp
+            ports:
+              - 8080
+              - 22
+              - 50000
+            cidr_ip: 0.0.0.0/0
+      register: sg
+
     - name: AWS | Launch instance
       ec2:
         key_name: "{{ key }}"
@@ -10,13 +25,14 @@
         wait: yes
         type: "{{ type }}"
         count: 1
-        group_id: "{{ sg_id }}"
+        group_id: "{{ sg.group_id }}"
         vpc_subnet_id: "{{ subnet }}"
         assign_public_ip: yes
         region: "{{ region }}"
         instance_tags:
           Name: "EC2-Ansible-Talita"
       register: machine
+      
 
     - name: AWS | Add instance for host
       add_host:
@@ -47,6 +63,7 @@
         region: "{{ region }}"
       with_items: "{{ machine.instances }}"
       register: ec2_vol
+    
 
 - name: AWS | Provision  instance
   hosts: docker
